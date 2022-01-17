@@ -85,7 +85,7 @@ contract DexProxy is Ownable {
         address targetDex,
         bytes calldata encodedParameters,
         FeeInfo calldata feeInfo
-    ) private returns(uint) {
+    ) private returns (uint) {
         require(dexes[targetDex], "Passed dex is not supported.");
         require(availableFeeValues[feeInfo.fee], "Passed fee value is not supported.");
         uint fromTokenBalanceBefore = getBalance(fromToken);
@@ -99,11 +99,11 @@ contract DexProxy is Ownable {
 
         uint fromTokenBalanceAfter = getBalance(fromToken);
         uint tokensPaid = fromTokenBalanceBefore - fromTokenBalanceAfter;
-        require(tokensPaid == value, 'Value parameter is not equal to swap data amount parameter.');
+        require(tokensPaid == value, "Value parameter is not equal to swap data amount parameter.");
 
         uint toTokenBalanceAfter = getBalance(toToken);
         uint tokensReceived = toTokenBalanceAfter - toTokenBalanceBefore;
-        require(tokensReceived > 0, 'Swapped to zero tokens.');
+        require(tokensReceived > 0, "Swapped to zero tokens.");
 
         return tokensReceived;
     }
@@ -141,8 +141,8 @@ contract DexProxy is Ownable {
         uint tokensReceived,
         FeeInfo calldata feeInfo
     ) private {
-        uint integratorAmount = tokensReceived * feeInfo.fee / feeDivisor;
-        uint providerAmount = tokensReceived * providerBaseFee / feeDivisor;
+        uint integratorAmount = (tokensReceived * feeInfo.fee) / feeDivisor;
+        uint providerAmount = (tokensReceived * providerBaseFee) / feeDivisor;
         uint userAmount = tokensReceived - integratorAmount - providerAmount;
 
         transferTokenOrNativeCoin(toToken, feeInfo.feeTarget, integratorAmount);
@@ -159,9 +159,9 @@ contract DexProxy is Ownable {
         uint integratorFeeBonus = providerBaseFee - providerDiscountFee - promoterFee;
         uint integratorFee = feeInfo.fee + integratorFeeBonus;
 
-        uint integratorAmount = tokensReceived * integratorFee / feeDivisor;
-        uint providerAmount = tokensReceived * providerDiscountFee / feeDivisor;
-        uint promoterAmount = tokensReceived * promoterFee / feeDivisor;
+        uint integratorAmount = (tokensReceived * integratorFee) / feeDivisor;
+        uint providerAmount = (tokensReceived * providerDiscountFee) / feeDivisor;
+        uint promoterAmount = (tokensReceived * promoterFee) / feeDivisor;
         uint userAmount = tokensReceived - integratorAmount - promoterAmount - providerAmount;
 
         transferTokenOrNativeCoin(toToken, feeInfo.feeTarget, integratorAmount);
@@ -170,7 +170,11 @@ contract DexProxy is Ownable {
         transferTokenOrNativeCoin(toToken, _msgSender(), userAmount);
     }
 
-    function transferTokenOrNativeCoin(address tokenAddress, address receiver, uint amount) private {
+    function transferTokenOrNativeCoin(
+        address tokenAddress,
+        address receiver,
+        uint amount
+    ) private {
         if (tokenAddress == address(0)) {
             payable(receiver).transfer(amount);
         } else {
@@ -183,7 +187,7 @@ contract DexProxy is Ownable {
     }
 
     function _setPromoterFee(uint _promoterFee) private {
-        require(_promoterFee <= feeDivisor, 'Fee can not be grow than feeDivisor');
+        require(_promoterFee <= feeDivisor, "Fee can not be grow than feeDivisor");
         promoterFee = _promoterFee;
     }
 
@@ -192,8 +196,11 @@ contract DexProxy is Ownable {
     }
 
     function _setProviderBaseFee(uint _providerBaseFee) private {
-        require(_providerBaseFee <= feeDivisor, 'Fee can not be grow than feeDivisor');
-        require(_providerBaseFee - promoterFee >= providerDiscountFee, 'Base fee minus promoter fee must be grow or equal than discount fee');
+        require(_providerBaseFee <= feeDivisor, "Fee can not be grow than feeDivisor");
+        require(
+            _providerBaseFee - promoterFee >= providerDiscountFee,
+            "Base fee minus promoter fee must be grow or equal than discount fee"
+        );
         providerBaseFee = _providerBaseFee;
     }
 
@@ -202,8 +209,11 @@ contract DexProxy is Ownable {
     }
 
     function _setProviderDiscountFee(uint _providerDiscountFee) private {
-        require(_providerDiscountFee <= feeDivisor, 'Fee can not be grow than feeDivisor');
-        require(_providerDiscountFee + promoterFee <= providerBaseFee, 'Discount fee plus promoter fee must be less or equal than base fee');
+        require(_providerDiscountFee <= feeDivisor, "Fee can not be grow than feeDivisor");
+        require(
+            _providerDiscountFee + promoterFee <= providerBaseFee,
+            "Discount fee plus promoter fee must be less or equal than base fee"
+        );
         providerDiscountFee = _providerDiscountFee;
     }
 
@@ -220,7 +230,7 @@ contract DexProxy is Ownable {
     }
 
     function _setAvailableFeeValues(uint[] memory _availableFeeValues) private {
-        for (uint i=0; i < _availableFeeValues.length; i++) {
+        for (uint i = 0; i < _availableFeeValues.length; i++) {
             availableFeeValues[_availableFeeValues[i]] = true;
         }
     }
@@ -234,7 +244,7 @@ contract DexProxy is Ownable {
     }
 
     function _setDexes(address[] memory _dexes) private {
-        for (uint i=0; i < _dexes.length; i++) {
+        for (uint i = 0; i < _dexes.length; i++) {
             dexes[_dexes[i]] = true;
         }
     }
