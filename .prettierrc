@@ -5,7 +5,7 @@
       "files": "*.sol",
       "options": {
         "semi": true,
-        "singleQuote": true,
+        "singleQuote": false,
         "printWidth": 120
       }
     },
