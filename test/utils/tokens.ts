@@ -43,5 +43,12 @@ export const TOKENS = {
         decimals: 18,
         symbol: 'BUSD',
         name: 'BUSD Token'
+    },
+    BRBC: {
+        blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
+        address: '0x8e3bcc334657560253b83f08331d85267316e08a',
+        decimals: 18,
+        symbol: 'BRBC',
+        name: 'Rubic'
     }
 } as const;
