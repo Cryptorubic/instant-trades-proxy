@@ -15,10 +15,10 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       forking: {
-        url: process.env.ETHEREUM_PRC!,
-        blockNumber: 13961175
+        url: process.env.BSC_RPC!,
+        blockNumber: 14255005
       },
-      chainId: 1
+      chainId: 56
     },
     kovan: {
       url: process.env.KOVAN_URL || "",

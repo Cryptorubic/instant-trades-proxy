@@ -28,5 +28,19 @@ export const TOKENS = {
         decimals: 18,
         symbol: 'WETH',
         name: 'Wrapped Ether'
+    },
+    BNB: {
+        blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
+        address: '0x0000000000000000000000000000000000000000',
+        decimals: 18,
+        symbol: 'BNB',
+        name: 'Bnb'
+    },
+    BUSD: {
+        blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
+        address: '0xe9e7cea3dedca5984780bafc599bd69add087d56',
+        decimals: 18,
+        symbol: 'BUSD',
+        name: 'BUSD Token'
     }
 } as const;
