@@ -1,9 +1,10 @@
 import { BLOCKCHAIN_NAME } from './models/BLOCKCHAIN_NAME';
+import { NATIVE_TOKEN_ADDRESS } from './constants/NATIVE_TOKEN_ADDRESS';
 
 export const TOKENS = {
     ETH: {
         blockchain: BLOCKCHAIN_NAME.ETHEREUM,
-        address: '0x0000000000000000000000000000000000000000',
+        address: NATIVE_TOKEN_ADDRESS,
         decimals: 18,
         symbol: 'ETH',
         name: 'Ethereum'
@@ -31,7 +32,7 @@ export const TOKENS = {
     },
     BNB: {
         blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
-        address: '0x0000000000000000000000000000000000000000',
+        address: NATIVE_TOKEN_ADDRESS,
         decimals: 18,
         symbol: 'BNB',
         name: 'Bnb'

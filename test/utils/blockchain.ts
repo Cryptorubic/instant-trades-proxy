@@ -1,6 +1,7 @@
 import { BigNumber } from 'ethers';
 import { BigNumber as BN } from 'bignumber.js';
 import { network, ethers, config } from 'hardhat';
+import { NATIVE_TOKEN_ADDRESS } from './constants/NATIVE_TOKEN_ADDRESS';
 
 export function toWei(amount: string, decimals = 18): BigNumber {
     return BigNumber.from(new BN(amount).multipliedBy(10 ** decimals).toFixed());
@@ -66,4 +67,27 @@ export async function resetNetwork(): Promise<void> {
     const jsonRpcUrl = config.networks.hardhat.forking?.url;
     const blockNumber = config.networks.hardhat.forking?.blockNumber;
     await network.provider.send('hardhat_reset', [{ forking: { jsonRpcUrl, blockNumber } }]);
+}
+
+export async function getBalance(userAddress: string, tokenAddress: string): Promise<BigNumber> {
+    if (tokenAddress === NATIVE_TOKEN_ADDRESS) {
+        return ethers.provider.getBalance(userAddress);
+    }
+
+    const token = await ethers.getContractAt('IERC20', tokenAddress);
+    return token.balanceOf(userAddress);
+}
+
+export async function getTransactionFeeByReceipt(transactionReceipt: {
+    transactionHash: string;
+    gasUsed: BigNumber;
+}): Promise<BigNumber> {
+    const transaction = (await ethers.provider.getTransaction(transactionReceipt.transactionHash))!;
+    return transactionReceipt.gasUsed.mul(transaction.gasPrice!);
+}
+
+export async function getTransactionFeeByHash(transactionHash: string): Promise<BigNumber> {
+    const transaction = (await ethers.provider.getTransaction(transactionHash))!;
+    const transactionReceipt = (await ethers.provider.getTransactionReceipt(transactionHash))!;
+    return transactionReceipt.gasUsed.mul(transaction.gasPrice!);
 }

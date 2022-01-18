@@ -51,6 +51,8 @@ contract DexProxy is Ownable {
         _setDexes(_dexes);
     }
 
+    receive() external payable { }
+
     function swap(
         address fromToken,
         address toToken,
@@ -88,12 +90,15 @@ contract DexProxy is Ownable {
     ) private returns (uint) {
         require(dexes[targetDex], "Passed dex is not supported.");
         require(availableFeeValues[feeInfo.fee], "Passed fee value is not supported.");
-        uint fromTokenBalanceBefore = getBalance(fromToken);
+        uint fromTokenBalanceBefore;
         uint toTokenBalanceBefore = getBalance(toToken);
 
         if (fromToken == address(0)) {
+            fromTokenBalanceBefore = getBalance(fromToken);
             swapFromNativeToken(value, targetDex, encodedParameters);
         } else {
+            IERC20(fromToken).safeTransferFrom(_msgSender(), address(this), value);
+            fromTokenBalanceBefore = getBalance(fromToken);
             swapFromErc20Token(fromToken, value, targetDex, encodedParameters);
         }
 
@@ -123,7 +128,6 @@ contract DexProxy is Ownable {
         address targetDex,
         bytes calldata encodedParameters
     ) private {
-        IERC20(fromToken).safeTransferFrom(_msgSender(), address(this), value);
         IERC20(fromToken).safeApprove(targetDex, value);
         targetDex.functionCall(encodedParameters);
     }
