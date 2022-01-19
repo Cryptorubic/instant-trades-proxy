@@ -11,7 +11,7 @@ contract DexProxy is Withdrawable {
     using Address for address;
     using SafeERC20 for IERC20;
 
-    uint constant public feeDivisor = 100000;
+    uint public constant feeDivisor = 100000;
     /**
      * @dev Promoter fee in range 1 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
      */
@@ -49,7 +49,7 @@ contract DexProxy is Withdrawable {
         _setDexes(_dexes);
     }
 
-    receive() external payable { }
+    receive() external payable {}
 
     function swap(
         address fromToken,
@@ -224,7 +224,10 @@ contract DexProxy is Withdrawable {
     }
 
     function _setProviderFeeTarget(address _providerFeeTarget) private {
-        require(_providerFeeTarget != providerFeeTarget, "New providerFeeTarget value should not be equal to previous.");
+        require(
+            _providerFeeTarget != providerFeeTarget,
+            "New providerFeeTarget value should not be equal to previous."
+        );
         providerFeeTarget = _providerFeeTarget;
     }
 

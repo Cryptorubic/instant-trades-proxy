@@ -16,6 +16,11 @@ async function setStorageAt(address: string, index: string, value: string): Prom
     await ethers.provider.send('evm_mine', []);
 }
 
+function bnToHex(bn: BigNumber): string {
+    const hexWithZeros = bn.toHexString().slice(2);
+    return `0x${hexWithZeros.replace(/^0+/, '')}`;
+}
+
 async function findBalancesSlot(tokenAddress: string) {
     const encode = (types: string[], values: unknown[]) =>
         ethers.utils.defaultAbiCoder.encode(types, values);
@@ -94,9 +99,4 @@ export async function getTransactionFeeByHash(transactionHash: string): Promise<
     const transaction = (await ethers.provider.getTransaction(transactionHash))!;
     const transactionReceipt = (await ethers.provider.getTransactionReceipt(transactionHash))!;
     return transactionReceipt.gasUsed.mul(transaction.gasPrice!);
-}
-
-function bnToHex(bn: BigNumber): string {
-    const hexWithZeros = bn.toHexString().slice(2);
-    return `0x${hexWithZeros.replace(/^0+/, '')}`;
 }
