@@ -63,6 +63,10 @@ export async function setTokenBalance(
     await setStorageAt(tokenAddress, index.toString(), toBytes32(amount).toString());
 }
 
+export async function setNativeBalance(amount: BigNumber, receiver: string): Promise<void> {
+    await ethers.provider.send('hardhat_setBalance', [receiver, bnToHex(amount)]);
+}
+
 export async function resetNetwork(): Promise<void> {
     const jsonRpcUrl = config.networks.hardhat.forking?.url;
     const blockNumber = config.networks.hardhat.forking?.blockNumber;
@@ -90,4 +94,9 @@ export async function getTransactionFeeByHash(transactionHash: string): Promise<
     const transaction = (await ethers.provider.getTransaction(transactionHash))!;
     const transactionReceipt = (await ethers.provider.getTransactionReceipt(transactionHash))!;
     return transactionReceipt.gasUsed.mul(transaction.gasPrice!);
+}
+
+function bnToHex(bn: BigNumber): string {
+    const hexWithZeros = bn.toHexString().slice(2);
+    return `0x${hexWithZeros.replace(/^0+/, '')}`;
 }

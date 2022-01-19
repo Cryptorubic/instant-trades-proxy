@@ -11,7 +11,7 @@ import {
 import { BigNumber } from 'ethers';
 import { expect } from 'chai';
 
-describe.only('Contract fields setters', function () {
+describe('Contract fields setters', function () {
     const availableDexesList = [
         '0x0000000000000000000000000000000000000001',
         '0x0000000000000000000000000000000000000002'
