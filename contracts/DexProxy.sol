@@ -13,27 +13,27 @@ contract DexProxy is Ownable {
     using Address for address;
     using SafeERC20 for IERC20;
 
-    uint constant feeDivisor = 100000;
+    uint constant public feeDivisor = 100000;
     /**
      * @dev Promoter fee in range 1 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
      */
-    uint promoterFee;
+    uint public promoterFee;
 
     /**
      * @dev Contract owner fee (if no promocode passed) in range 1 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
      */
-    uint providerBaseFee;
+    uint public providerBaseFee;
 
     /**
      * @dev Contract owner discount fee in range 1 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
      */
-    uint providerDiscountFee;
+    uint public providerDiscountFee;
 
-    address providerFeeTarget;
+    address public providerFeeTarget;
 
-    mapping(address => bool) dexes;
+    mapping(address => bool) public dexes;
 
-    mapping(uint => bool) availableFeeValues;
+    mapping(uint => bool) public availableFeeValues;
 
     constructor(
         uint _promoterFee,
@@ -191,7 +191,7 @@ contract DexProxy is Ownable {
     }
 
     function _setPromoterFee(uint _promoterFee) private {
-        require(_promoterFee <= feeDivisor, "Fee can not be grow than feeDivisor");
+        require(_promoterFee <= feeDivisor, "Fee can not be grow than feeDivisor.");
         promoterFee = _promoterFee;
     }
 
@@ -200,10 +200,10 @@ contract DexProxy is Ownable {
     }
 
     function _setProviderBaseFee(uint _providerBaseFee) private {
-        require(_providerBaseFee <= feeDivisor, "Fee can not be grow than feeDivisor");
+        require(_providerBaseFee <= feeDivisor, "Fee can not be grow than feeDivisor.");
         require(
             _providerBaseFee - promoterFee >= providerDiscountFee,
-            "Base fee minus promoter fee must be grow or equal than discount fee"
+            "Base fee minus promoter fee must be grow or equal than discount fee."
         );
         providerBaseFee = _providerBaseFee;
     }
@@ -213,10 +213,10 @@ contract DexProxy is Ownable {
     }
 
     function _setProviderDiscountFee(uint _providerDiscountFee) private {
-        require(_providerDiscountFee <= feeDivisor, "Fee can not be grow than feeDivisor");
+        require(_providerDiscountFee <= feeDivisor, "Fee can not be grow than feeDivisor.");
         require(
             _providerDiscountFee + promoterFee <= providerBaseFee,
-            "Discount fee plus promoter fee must be less or equal than base fee"
+            "Discount fee plus promoter fee must be less or equal than base fee."
         );
         providerDiscountFee = _providerDiscountFee;
     }
@@ -226,6 +226,7 @@ contract DexProxy is Ownable {
     }
 
     function _setProviderFeeTarget(address _providerFeeTarget) private {
+        require(_providerFeeTarget != providerFeeTarget, "New providerFeeTarget value should not be equal to previous.");
         providerFeeTarget = _providerFeeTarget;
     }
 
@@ -235,6 +236,7 @@ contract DexProxy is Ownable {
 
     function _setAvailableFeeValues(uint[] memory _availableFeeValues) private {
         for (uint i = 0; i < _availableFeeValues.length; i++) {
+            require(_availableFeeValues[i] <= feeDivisor, "Fee can not be grow than feeDivisor.");
             availableFeeValues[_availableFeeValues[i]] = true;
         }
     }
