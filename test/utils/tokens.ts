@@ -50,5 +50,12 @@ export const TOKENS = {
         decimals: 18,
         symbol: 'BRBC',
         name: 'Rubic'
+    },
+    CAKE: {
+        blockchain: BLOCKCHAIN_NAME.BINANCE_SMART_CHAIN,
+        address: '0x0e09fabb73bd3ade0a17ecc321fd13a19e81ce82',
+        decimals: 18,
+        symbol: 'CAKE',
+        name: 'PancakeSwap Token'
     }
 } as const;

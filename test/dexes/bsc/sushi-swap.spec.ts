@@ -18,8 +18,8 @@ import {
     toWei
 } from '../../utils/blockchain';
 
-describe('DexProxy with Pancake swap', function () {
-    const pancakeSwapAddress = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
+describe('DexProxy with Sushi swap', function () {
+    const sushiSwapAddress = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506';
 
     let dexProxy: DexProxyType;
     let alice: SignerWithAddress;
@@ -42,7 +42,7 @@ describe('DexProxy with Pancake swap', function () {
             providerDiscountFee,
             providerAddress,
             availableFeeValues,
-            [pancakeSwapAddress]
+            [sushiSwapAddress]
         );
     });
 
@@ -50,10 +50,10 @@ describe('DexProxy with Pancake swap', function () {
         const fromToken = TOKENS.BNB;
         const toToken = TOKENS.BUSD;
         const amount = toWei('1', fromToken.decimals);
-        const expectedToAmount = toWei('422.380197389784994586', toToken.decimals);
-        const pancakeSwapCallData = `0x7ff36ab50000000000000000000000000000000000000000000000167077fca069f57a660000000000000000000000000000000000000000000000000000000000000080000000000000000000000000${dexProxy.address.slice(
+        const expectedToAmount = toWei('391.713935640904315161', toToken.decimals);
+        const sushiSwapCallData = `0x7ff36ab5000000000000000000000000000000000000000000000014cf66821831667f7a0000000000000000000000000000000000000000000000000000000000000080000000000000000000000000${dexProxy.address.slice(
             2
-        )}0000000000000000000000000000000000000000000000000000000061e690c00000000000000000000000000000000000000000000000000000000000000002000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d56`;
+        )}0000000000000000000000000000000000000000000000000000000061e941540000000000000000000000000000000000000000000000000000000000000002000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d56`;
         const integratorFee = 100;
 
         const aliceFromTokenBalanceBefore = await getBalance(alice.address, fromToken.address);
@@ -67,8 +67,8 @@ describe('DexProxy with Pancake swap', function () {
             fromToken.address,
             toToken.address,
             amount,
-            pancakeSwapAddress,
-            pancakeSwapCallData,
+            sushiSwapAddress,
+            sushiSwapCallData,
             {
                 fee: integratorFee,
                 feeTarget: integratorAddress
@@ -121,10 +121,10 @@ describe('DexProxy with Pancake swap', function () {
         const fromToken = TOKENS.BUSD;
         const toToken = TOKENS.BNB;
         const amount = toWei('1', fromToken.decimals);
-        const expectedToAmount = toWei('0.002356615098091433', toToken.decimals);
-        const pancakeSwapCallData = `0x18cbafe50000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000834765dad9d4400000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000${dexProxy.address.slice(
+        const expectedToAmount = toWei('0.002359343964441116', toToken.decimals);
+        const sushiSwapCallData = `0x18cbafe50000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000836e505b9b42600000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000${dexProxy.address.slice(
             2
-        )}0000000000000000000000000000000000000000000000000000000061e6cb520000000000000000000000000000000000000000000000000000000000000003000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d5600000000000000000000000023396cf899ca06c4472205fc903bdb4de249d6fc000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c`;
+        )}0000000000000000000000000000000000000000000000000000000061e941df0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d56000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c`;
         const integratorFee = 100;
 
         await setTokenBalance(fromToken.address, amount, alice.address);
@@ -144,8 +144,8 @@ describe('DexProxy with Pancake swap', function () {
             fromToken.address,
             toToken.address,
             amount,
-            pancakeSwapAddress,
-            pancakeSwapCallData,
+            sushiSwapAddress,
+            sushiSwapCallData,
             {
                 fee: integratorFee,
                 feeTarget: integratorAddress
@@ -192,12 +192,12 @@ describe('DexProxy with Pancake swap', function () {
 
     it('Should give correct fee in swap ERC20-ERC20 with promoter.', async () => {
         const fromToken = TOKENS.BUSD;
-        const toToken = TOKENS.BRBC;
+        const toToken = TOKENS.CAKE;
         const amount = toWei('1', fromToken.decimals);
-        const expectedToAmount = toWei('4.847116995576762401', toToken.decimals);
-        const pancakeSwapCallData = `0x38ed17390000000000000000000000000000000000000000000000000de0b6b3a764000000000000000000000000000000000000000000000000000041ec02ae8bfd459100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000${dexProxy.address.slice(
+        const expectedToAmount = toWei('0.095877856589956001', toToken.decimals);
+        const sushiSwapCallData = `0x38ed17390000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000014dd0650031595100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000${dexProxy.address.slice(
             2
-        )}0000000000000000000000000000000000000000000000000000000061e6e71f0000000000000000000000000000000000000000000000000000000000000004000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d5600000000000000000000000023396cf899ca06c4472205fc903bdb4de249d6fc000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c0000000000000000000000008e3bcc334657560253b83f08331d85267316e08a`;
+        )}0000000000000000000000000000000000000000000000000000000061e942370000000000000000000000000000000000000000000000000000000000000003000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d56000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c0000000000000000000000000e09fabb73bd3ade0a17ecc321fd13a19e81ce82`;
         const integratorFee = 100;
 
         await setTokenBalance(fromToken.address, amount, alice.address);
@@ -216,8 +216,8 @@ describe('DexProxy with Pancake swap', function () {
             fromToken.address,
             toToken.address,
             amount,
-            pancakeSwapAddress,
-            pancakeSwapCallData,
+            sushiSwapAddress,
+            sushiSwapCallData,
             {
                 fee: integratorFee,
                 feeTarget: integratorAddress
@@ -261,10 +261,10 @@ describe('DexProxy with Pancake swap', function () {
         const fromToken = TOKENS.BNB;
         const toToken = TOKENS.BUSD;
         const amount = toWei('1', fromToken.decimals);
-        const expectedToAmount = toWei('422.380197389784994586', toToken.decimals);
-        const pancakeSwapCallData = `0x7ff36ab50000000000000000000000000000000000000000000000167077fca069f57a660000000000000000000000000000000000000000000000000000000000000080000000000000000000000000${dexProxy.address.slice(
+        const expectedToAmount = toWei('391.713935640904315161', toToken.decimals);
+        const sushiSwapCallData = `0x7ff36ab5000000000000000000000000000000000000000000000014cf66821831667f7a0000000000000000000000000000000000000000000000000000000000000080000000000000000000000000${dexProxy.address.slice(
             2
-        )}0000000000000000000000000000000000000000000000000000000061e690c00000000000000000000000000000000000000000000000000000000000000002000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d56`;
+        )}0000000000000000000000000000000000000000000000000000000061e941540000000000000000000000000000000000000000000000000000000000000002000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d56`;
         const integratorFee = 100;
 
         const aliceFromTokenBalanceBefore = await getBalance(alice.address, fromToken.address);
@@ -277,8 +277,8 @@ describe('DexProxy with Pancake swap', function () {
             fromToken.address,
             toToken.address,
             amount,
-            pancakeSwapAddress,
-            pancakeSwapCallData,
+            sushiSwapAddress,
+            sushiSwapCallData,
             {
                 fee: integratorFee,
                 feeTarget: integratorAddress
@@ -321,10 +321,10 @@ describe('DexProxy with Pancake swap', function () {
         const fromToken = TOKENS.BUSD;
         const toToken = TOKENS.BNB;
         const amount = toWei('1', fromToken.decimals);
-        const expectedToAmount = toWei('0.002356615098091433', toToken.decimals);
-        const pancakeSwapCallData = `0x18cbafe50000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000834765dad9d4400000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000${dexProxy.address.slice(
+        const expectedToAmount = toWei('0.002359343964441116', toToken.decimals);
+        const sushiSwapCallData = `0x18cbafe50000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000836e505b9b42600000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000${dexProxy.address.slice(
             2
-        )}0000000000000000000000000000000000000000000000000000000061e6cb520000000000000000000000000000000000000000000000000000000000000003000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d5600000000000000000000000023396cf899ca06c4472205fc903bdb4de249d6fc000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c`;
+        )}0000000000000000000000000000000000000000000000000000000061e941df0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d56000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c`;
         const integratorFee = 100;
 
         await setTokenBalance(fromToken.address, amount, alice.address);
@@ -343,8 +343,8 @@ describe('DexProxy with Pancake swap', function () {
             fromToken.address,
             toToken.address,
             amount,
-            pancakeSwapAddress,
-            pancakeSwapCallData,
+            sushiSwapAddress,
+            sushiSwapCallData,
             {
                 fee: integratorFee,
                 feeTarget: integratorAddress
@@ -383,12 +383,12 @@ describe('DexProxy with Pancake swap', function () {
 
     it('Should give correct fee in swap ERC20-ERC20 without promoter.', async () => {
         const fromToken = TOKENS.BUSD;
-        const toToken = TOKENS.BRBC;
+        const toToken = TOKENS.CAKE;
         const amount = toWei('1', fromToken.decimals);
-        const expectedToAmount = toWei('4.847116995576762401', toToken.decimals);
-        const pancakeSwapCallData = `0x38ed17390000000000000000000000000000000000000000000000000de0b6b3a764000000000000000000000000000000000000000000000000000041ec02ae8bfd459100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000${dexProxy.address.slice(
+        const expectedToAmount = toWei('0.095877856589956001', toToken.decimals);
+        const sushiSwapCallData = `0x38ed17390000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000014dd0650031595100000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000${dexProxy.address.slice(
             2
-        )}0000000000000000000000000000000000000000000000000000000061e6e71f0000000000000000000000000000000000000000000000000000000000000004000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d5600000000000000000000000023396cf899ca06c4472205fc903bdb4de249d6fc000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c0000000000000000000000008e3bcc334657560253b83f08331d85267316e08a`;
+        )}0000000000000000000000000000000000000000000000000000000061e942370000000000000000000000000000000000000000000000000000000000000003000000000000000000000000e9e7cea3dedca5984780bafc599bd69add087d56000000000000000000000000bb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c0000000000000000000000000e09fabb73bd3ade0a17ecc321fd13a19e81ce82`;
         const integratorFee = 100;
 
         await setTokenBalance(fromToken.address, amount, alice.address);
@@ -406,8 +406,8 @@ describe('DexProxy with Pancake swap', function () {
             fromToken.address,
             toToken.address,
             amount,
-            pancakeSwapAddress,
-            pancakeSwapCallData,
+            sushiSwapAddress,
+            sushiSwapCallData,
             {
                 fee: integratorFee,
                 feeTarget: integratorAddress
