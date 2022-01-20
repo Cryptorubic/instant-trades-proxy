@@ -72,9 +72,9 @@ export async function setNativeBalance(amount: BigNumber, receiver: string): Pro
     await ethers.provider.send('hardhat_setBalance', [receiver, bnToHex(amount)]);
 }
 
-export async function resetNetwork(): Promise<void> {
+export async function resetNetwork(blockNumber?: number): Promise<void> {
     const jsonRpcUrl = config.networks.hardhat.forking?.url;
-    const blockNumber = config.networks.hardhat.forking?.blockNumber;
+    blockNumber ||= config.networks.hardhat.forking?.blockNumber;
     await network.provider.send('hardhat_reset', [{ forking: { jsonRpcUrl, blockNumber } }]);
 }
 
