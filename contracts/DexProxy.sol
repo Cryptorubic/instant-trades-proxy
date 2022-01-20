@@ -5,11 +5,13 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./FeeInfo.sol";
+import "./FullMath.sol";
 import "./Withdrawable.sol";
 
 contract DexProxy is Withdrawable {
     using Address for address;
     using SafeERC20 for IERC20;
+    using FullMath for uint;
 
     uint public constant feeDivisor = 100000;
     /**
@@ -126,7 +128,7 @@ contract DexProxy is Withdrawable {
         address targetDex,
         bytes calldata encodedParameters
     ) private {
-        IERC20(fromToken).safeApprove(targetDex, value);
+        safeApproveToInfinityIfNeeded(IERC20(fromToken), targetDex, value);
         targetDex.functionCall(encodedParameters);
     }
 
@@ -143,8 +145,8 @@ contract DexProxy is Withdrawable {
         uint tokensReceived,
         FeeInfo calldata feeInfo
     ) private {
-        uint integratorAmount = (tokensReceived * feeInfo.fee) / feeDivisor;
-        uint providerAmount = (tokensReceived * providerBaseFee) / feeDivisor;
+        uint integratorAmount = tokensReceived.mulDiv(feeInfo.fee, feeDivisor);
+        uint providerAmount = tokensReceived.mulDiv(providerBaseFee, feeDivisor);
         uint userAmount = tokensReceived - integratorAmount - providerAmount;
 
         transferTokenOrNativeCoin(toToken, feeInfo.feeTarget, integratorAmount);
@@ -161,9 +163,9 @@ contract DexProxy is Withdrawable {
         uint integratorFeeBonus = providerBaseFee - providerDiscountFee - promoterFee;
         uint integratorFee = feeInfo.fee + integratorFeeBonus;
 
-        uint integratorAmount = (tokensReceived * integratorFee) / feeDivisor;
-        uint providerAmount = (tokensReceived * providerDiscountFee) / feeDivisor;
-        uint promoterAmount = (tokensReceived * promoterFee) / feeDivisor;
+        uint integratorAmount = tokensReceived.mulDiv(integratorFee, feeDivisor);
+        uint providerAmount = tokensReceived.mulDiv(providerDiscountFee, feeDivisor);
+        uint promoterAmount = tokensReceived.mulDiv(promoterFee, feeDivisor);
         uint userAmount = tokensReceived - integratorAmount - promoterAmount - providerAmount;
 
         transferTokenOrNativeCoin(toToken, feeInfo.feeTarget, integratorAmount);
@@ -181,6 +183,23 @@ contract DexProxy is Withdrawable {
             payable(receiver).transfer(amount);
         } else {
             IERC20(tokenAddress).safeTransfer(receiver, amount);
+        }
+    }
+
+    function safeApproveToInfinityIfNeeded(IERC20 token, address target, uint requiredAmount) private {
+        uint allowance = token.allowance(address(this), target);
+
+        if (allowance < requiredAmount) {
+            if (allowance == 0) {
+                token.safeApprove(target, type(uint).max);
+            } else {
+                try token.approve(target, type(uint).max) returns (bool res) {
+                    require(res == true, "Approve failed");
+                } catch {
+                    token.safeApprove(target, 0);
+                    token.safeApprove(target, type(uint).max);
+                }
+            }
         }
     }
 
@@ -236,7 +255,8 @@ contract DexProxy is Withdrawable {
     }
 
     function _setAvailableFeeValues(uint[] memory _availableFeeValues) private {
-        for (uint i = 0; i < _availableFeeValues.length; i++) {
+        uint _availableFeeValuesLength = _availableFeeValues.length;
+        for (uint i = 0; i < _availableFeeValuesLength; i++) {
             require(_availableFeeValues[i] <= feeDivisor, "Fee can not be grow than feeDivisor.");
             availableFeeValues[_availableFeeValues[i]] = true;
         }
@@ -251,7 +271,8 @@ contract DexProxy is Withdrawable {
     }
 
     function _setDexes(address[] memory _dexes) private {
-        for (uint i = 0; i < _dexes.length; i++) {
+        uint _dexesLength = _dexes.length;
+        for (uint i = 0; i < _dexesLength; i++) {
             dexes[_dexes[i]] = true;
         }
     }
