@@ -186,7 +186,11 @@ contract DexProxy is Withdrawable {
         }
     }
 
-    function _safeApproveToInfinityIfNeeded(IERC20 token, address target, uint requiredAmount) private {
+    function _safeApproveToInfinityIfNeeded(
+        IERC20 token,
+        address target,
+        uint requiredAmount
+    ) private {
         uint allowance = token.allowance(address(this), target);
 
         if (allowance < requiredAmount) {
@@ -233,7 +237,7 @@ contract DexProxy is Withdrawable {
         require(_providerDiscountFee <= FEE_DIVISOR, "Fee can not be greater than feeDivisor.");
         require(
             _providerDiscountFee + promoterFee <= providerBaseFee,
-            "Discount fee plus promoter fee must be less or equal than base fee."
+            "Discount fee plus promoter fee must be lte than base fee."
         );
         providerDiscountFee = _providerDiscountFee;
     }
