@@ -1,31 +1,43 @@
 import hardhat from 'hardhat';
+import {
+    dexes,
+    prodAvailableFeeValues,
+    prodPromoterFee,
+    prodProviderBaseFee,
+    prodProviderDiscountFee,
+    prodProviderFeeTarget
+} from '../constants';
 
 async function main() {
-    const KOVAN_UNISWAP_ADDRESS = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
+    const blockchainName = hardhat.network.name;
+
+    const dexesList = dexes[blockchainName as keyof typeof dexes];
+    if (!dexesList) {
+        throw Error(`Dexes for blockchain ${blockchainName} was not set.`);
+    }
+
     const DexProxy = await hardhat.ethers.getContractFactory('DexProxy');
-    const dexProxy = await DexProxy.deploy(
-        25,
-        100,
-        50,
-        '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-        [100, 200],
-        [KOVAN_UNISWAP_ADDRESS]
-    );
+
+    const constructorArguments: Parameters<typeof DexProxy.deploy> = [
+        prodPromoterFee,
+        prodProviderBaseFee,
+        prodProviderDiscountFee,
+        prodProviderFeeTarget,
+        prodAvailableFeeValues,
+        dexesList
+    ];
+    const dexProxy = await DexProxy.deploy(...constructorArguments);
 
     await dexProxy.deployed();
 
+    console.log(`DexProxy deployed in ${blockchainName} to:`, dexProxy.address);
+
     await hardhat.run('verify:verify', {
         address: dexProxy.address,
-        constructorArguments: [
-            25,
-            75,
-            '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-            [100, 200],
-            [KOVAN_UNISWAP_ADDRESS]
-        ]
+        constructorArguments
     });
 
-    console.log('DexProxy deployed to:', dexProxy.address);
+    console.log('DexProxy is verified.');
 }
 
 main().catch(error => {
