@@ -52,12 +52,12 @@ describe('Contract fields setters', function () {
     });
 
     it('Owner can not set promoter fee grater than feeDivisor.', async () => {
-        const currentFeeDivisor: BigNumber = await dexProxy.feeDivisor();
+        const currentFeeDivisor: BigNumber = await dexProxy.FEE_DIVISOR();
         const newPromoterFeeToSet = currentFeeDivisor.add(1);
         dexProxy = dexProxy.connect(owner);
 
         await expect(dexProxy.setPromoterFee(newPromoterFeeToSet)).to.be.revertedWith(
-            'Fee can not be grow than feeDivisor.'
+            'Fee can not be greater than feeDivisor.'
         );
     });
 
@@ -88,17 +88,17 @@ describe('Contract fields setters', function () {
         dexProxy = dexProxy.connect(owner);
 
         await expect(dexProxy.setProviderBaseFee(newProviderBaseFeeToSet)).to.be.revertedWith(
-            'Base fee minus promoter fee must be grow or equal than discount fee.'
+            'Base fee minus promoter fee must be gte than discount fee.'
         );
     });
 
     it('Owner can not set provider base fee grater than feeDivisor.', async () => {
-        const currentFeeDivisor: BigNumber = await dexProxy.feeDivisor();
+        const currentFeeDivisor: BigNumber = await dexProxy.FEE_DIVISOR();
         const newProviderBaseFeeToSet = currentFeeDivisor.add(1);
         dexProxy = dexProxy.connect(owner);
 
         await expect(dexProxy.setProviderBaseFee(newProviderBaseFeeToSet)).to.be.revertedWith(
-            'Fee can not be grow than feeDivisor.'
+            'Fee can not be greater than feeDivisor.'
         );
     });
 
@@ -130,17 +130,17 @@ describe('Contract fields setters', function () {
 
         await expect(
             dexProxy.setProviderDiscountFee(newProviderDiscountFeeToSet)
-        ).to.be.revertedWith('Discount fee plus promoter fee must be less or equal than base fee.');
+        ).to.be.revertedWith('Discount fee plus promoter fee must be lte than base fee.');
     });
 
     it('Owner can not set provider discount fee grater than feeDivisor.', async () => {
-        const currentFeeDivisor: BigNumber = await dexProxy.feeDivisor();
+        const currentFeeDivisor: BigNumber = await dexProxy.FEE_DIVISOR();
         const newProviderDiscountFeeToSet = currentFeeDivisor.add(1);
         dexProxy = dexProxy.connect(owner);
 
         await expect(
             dexProxy.setProviderDiscountFee(newProviderDiscountFeeToSet)
-        ).to.be.revertedWith('Fee can not be grow than feeDivisor.');
+        ).to.be.revertedWith('Fee can not be greater than feeDivisor.');
     });
 
     it('Only owner can set provider base fee.', async () => {
@@ -202,12 +202,12 @@ describe('Contract fields setters', function () {
     });
 
     it('Owner can not set available fee value grater than feeDivisor.', async () => {
-        const currentFeeDivisor = await dexProxy.feeDivisor();
+        const currentFeeDivisor = await dexProxy.FEE_DIVISOR();
         const newAvailableFeeValue = currentFeeDivisor.add(1);
         dexProxy = dexProxy.connect(owner);
 
         await expect(dexProxy.setAvailableFeeValues([newAvailableFeeValue])).to.be.revertedWith(
-            'Fee can not be grow than feeDivisor.'
+            'Fee can not be greater than feeDivisor.'
         );
     });
 

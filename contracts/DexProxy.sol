@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./FeeInfo.sol";
-import "./FullMath.sol";
+import "./libraries/FullMath.sol";
 import "./Withdrawable.sol";
 
 contract DexProxy is Withdrawable {
@@ -13,19 +13,19 @@ contract DexProxy is Withdrawable {
     using SafeERC20 for IERC20;
     using FullMath for uint;
 
-    uint public constant feeDivisor = 100000;
+    uint public constant FEE_DIVISOR = 100000;
     /**
-     * @dev Promoter fee in range 1 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
+     * @dev Promoter fee in range 0 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
      */
     uint public promoterFee;
 
     /**
-     * @dev Contract owner fee (if no promocode passed) in range 1 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
+     * @dev Contract owner fee (if no promocode passed) in range 0 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
      */
     uint public providerBaseFee;
 
     /**
-     * @dev Contract owner discount fee in range 1 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
+     * @dev Contract owner discount fee in range 0 to feeDivisor (1 means 1/feeDivisor), so range is 0.00001 (0.001%) to 1
      */
     uint public providerDiscountFee;
 
@@ -63,7 +63,7 @@ contract DexProxy is Withdrawable {
     ) external payable {
         uint tokensReceived = _swap(fromToken, toToken, value, targetDex, encodedParameters, feeInfo);
 
-        sendReceivedTokens(toToken, tokensReceived, feeInfo);
+        _sendReceivedTokens(toToken, tokensReceived, feeInfo);
     }
 
     function swapWithPromoter(
@@ -77,7 +77,7 @@ contract DexProxy is Withdrawable {
     ) external payable {
         uint tokensReceived = _swap(fromToken, toToken, value, targetDex, encodedParameters, feeInfo);
 
-        sendReceivedTokens(toToken, tokensReceived, feeInfo, promoterAddress);
+        _sendReceivedTokens(toToken, tokensReceived, feeInfo, promoterAddress);
     }
 
     function _swap(
@@ -91,29 +91,29 @@ contract DexProxy is Withdrawable {
         require(dexes[targetDex], "Passed dex is not supported.");
         require(availableFeeValues[feeInfo.fee], "Passed fee value is not supported.");
         uint fromTokenBalanceBefore;
-        uint toTokenBalanceBefore = getBalance(toToken);
+        uint toTokenBalanceBefore = _getBalance(toToken);
 
         if (fromToken == address(0)) {
-            fromTokenBalanceBefore = getBalance(fromToken);
-            swapFromNativeToken(value, targetDex, encodedParameters);
+            fromTokenBalanceBefore = _getBalance(fromToken);
+            _swapFromNativeToken(value, targetDex, encodedParameters);
         } else {
             IERC20(fromToken).safeTransferFrom(_msgSender(), address(this), value);
-            fromTokenBalanceBefore = getBalance(fromToken);
-            swapFromErc20Token(fromToken, value, targetDex, encodedParameters);
+            fromTokenBalanceBefore = _getBalance(fromToken);
+            _swapFromErc20Token(fromToken, value, targetDex, encodedParameters);
         }
 
-        uint fromTokenBalanceAfter = getBalance(fromToken);
+        uint fromTokenBalanceAfter = _getBalance(fromToken);
         uint tokensPaid = fromTokenBalanceBefore - fromTokenBalanceAfter;
         require(tokensPaid == value, "Value parameter is not equal to swap data amount parameter.");
 
-        uint toTokenBalanceAfter = getBalance(toToken);
+        uint toTokenBalanceAfter = _getBalance(toToken);
         uint tokensReceived = toTokenBalanceAfter - toTokenBalanceBefore;
         require(tokensReceived > 0, "Swapped to zero tokens.");
 
         return tokensReceived;
     }
 
-    function swapFromNativeToken(
+    function _swapFromNativeToken(
         uint value,
         address targetDex,
         bytes calldata encodedParameters
@@ -122,17 +122,17 @@ contract DexProxy is Withdrawable {
         targetDex.functionCallWithValue(encodedParameters, value);
     }
 
-    function swapFromErc20Token(
+    function _swapFromErc20Token(
         address fromToken,
         uint value,
         address targetDex,
         bytes calldata encodedParameters
     ) private {
-        safeApproveToInfinityIfNeeded(IERC20(fromToken), targetDex, value);
+        _safeApproveToInfinityIfNeeded(IERC20(fromToken), targetDex, value);
         targetDex.functionCall(encodedParameters);
     }
 
-    function getBalance(address tokenAddress) private view returns (uint balance) {
+    function _getBalance(address tokenAddress) private view returns (uint balance) {
         if (tokenAddress == address(0)) {
             balance = address(this).balance;
         } else {
@@ -140,21 +140,21 @@ contract DexProxy is Withdrawable {
         }
     }
 
-    function sendReceivedTokens(
+    function _sendReceivedTokens(
         address toToken,
         uint tokensReceived,
         FeeInfo calldata feeInfo
     ) private {
-        uint integratorAmount = tokensReceived.mulDiv(feeInfo.fee, feeDivisor);
-        uint providerAmount = tokensReceived.mulDiv(providerBaseFee, feeDivisor);
+        uint integratorAmount = tokensReceived.mulDiv(feeInfo.fee, FEE_DIVISOR);
+        uint providerAmount = tokensReceived.mulDiv(providerBaseFee, FEE_DIVISOR);
         uint userAmount = tokensReceived - integratorAmount - providerAmount;
 
-        transferTokenOrNativeCoin(toToken, feeInfo.feeTarget, integratorAmount);
-        transferTokenOrNativeCoin(toToken, providerFeeTarget, providerAmount);
-        transferTokenOrNativeCoin(toToken, _msgSender(), userAmount);
+        _transferTokenOrNativeCoin(toToken, feeInfo.feeTarget, integratorAmount);
+        _transferTokenOrNativeCoin(toToken, providerFeeTarget, providerAmount);
+        _transferTokenOrNativeCoin(toToken, _msgSender(), userAmount);
     }
 
-    function sendReceivedTokens(
+    function _sendReceivedTokens(
         address toToken,
         uint tokensReceived,
         FeeInfo calldata feeInfo,
@@ -163,18 +163,18 @@ contract DexProxy is Withdrawable {
         uint integratorFeeBonus = providerBaseFee - providerDiscountFee - promoterFee;
         uint integratorFee = feeInfo.fee + integratorFeeBonus;
 
-        uint integratorAmount = tokensReceived.mulDiv(integratorFee, feeDivisor);
-        uint providerAmount = tokensReceived.mulDiv(providerDiscountFee, feeDivisor);
-        uint promoterAmount = tokensReceived.mulDiv(promoterFee, feeDivisor);
+        uint integratorAmount = tokensReceived.mulDiv(integratorFee, FEE_DIVISOR);
+        uint providerAmount = tokensReceived.mulDiv(providerDiscountFee, FEE_DIVISOR);
+        uint promoterAmount = tokensReceived.mulDiv(promoterFee, FEE_DIVISOR);
         uint userAmount = tokensReceived - integratorAmount - promoterAmount - providerAmount;
 
-        transferTokenOrNativeCoin(toToken, feeInfo.feeTarget, integratorAmount);
-        transferTokenOrNativeCoin(toToken, providerFeeTarget, providerAmount);
-        transferTokenOrNativeCoin(toToken, promoterAddress, promoterAmount);
-        transferTokenOrNativeCoin(toToken, _msgSender(), userAmount);
+        _transferTokenOrNativeCoin(toToken, feeInfo.feeTarget, integratorAmount);
+        _transferTokenOrNativeCoin(toToken, providerFeeTarget, providerAmount);
+        _transferTokenOrNativeCoin(toToken, promoterAddress, promoterAmount);
+        _transferTokenOrNativeCoin(toToken, _msgSender(), userAmount);
     }
 
-    function transferTokenOrNativeCoin(
+    function _transferTokenOrNativeCoin(
         address tokenAddress,
         address receiver,
         uint amount
@@ -186,7 +186,11 @@ contract DexProxy is Withdrawable {
         }
     }
 
-    function safeApproveToInfinityIfNeeded(IERC20 token, address target, uint requiredAmount) private {
+    function _safeApproveToInfinityIfNeeded(
+        IERC20 token,
+        address target,
+        uint requiredAmount
+    ) private {
         uint allowance = token.allowance(address(this), target);
 
         if (allowance < requiredAmount) {
@@ -194,7 +198,7 @@ contract DexProxy is Withdrawable {
                 token.safeApprove(target, type(uint).max);
             } else {
                 try token.approve(target, type(uint).max) returns (bool res) {
-                    require(res == true, "Approve failed");
+                    require(res, "Approve failed");
                 } catch {
                     token.safeApprove(target, 0);
                     token.safeApprove(target, type(uint).max);
@@ -208,7 +212,7 @@ contract DexProxy is Withdrawable {
     }
 
     function _setPromoterFee(uint _promoterFee) private {
-        require(_promoterFee <= feeDivisor, "Fee can not be grow than feeDivisor.");
+        require(_promoterFee <= FEE_DIVISOR, "Fee can not be greater than feeDivisor.");
         promoterFee = _promoterFee;
     }
 
@@ -217,10 +221,10 @@ contract DexProxy is Withdrawable {
     }
 
     function _setProviderBaseFee(uint _providerBaseFee) private {
-        require(_providerBaseFee <= feeDivisor, "Fee can not be grow than feeDivisor.");
+        require(_providerBaseFee <= FEE_DIVISOR, "Fee can not be greater than feeDivisor.");
         require(
             _providerBaseFee - promoterFee >= providerDiscountFee,
-            "Base fee minus promoter fee must be grow or equal than discount fee."
+            "Base fee minus promoter fee must be gte than discount fee."
         );
         providerBaseFee = _providerBaseFee;
     }
@@ -230,10 +234,10 @@ contract DexProxy is Withdrawable {
     }
 
     function _setProviderDiscountFee(uint _providerDiscountFee) private {
-        require(_providerDiscountFee <= feeDivisor, "Fee can not be grow than feeDivisor.");
+        require(_providerDiscountFee <= FEE_DIVISOR, "Fee can not be greater than feeDivisor.");
         require(
             _providerDiscountFee + promoterFee <= providerBaseFee,
-            "Discount fee plus promoter fee must be less or equal than base fee."
+            "Discount fee plus promoter fee must be lte than base fee."
         );
         providerDiscountFee = _providerDiscountFee;
     }
@@ -257,7 +261,7 @@ contract DexProxy is Withdrawable {
     function _setAvailableFeeValues(uint[] memory _availableFeeValues) private {
         uint _availableFeeValuesLength = _availableFeeValues.length;
         for (uint i = 0; i < _availableFeeValuesLength; i++) {
-            require(_availableFeeValues[i] <= feeDivisor, "Fee can not be grow than feeDivisor.");
+            require(_availableFeeValues[i] <= FEE_DIVISOR, "Fee can not be greater than feeDivisor.");
             availableFeeValues[_availableFeeValues[i]] = true;
         }
     }
